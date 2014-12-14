@@ -11,13 +11,15 @@
 #import "User.h"
 
 
-@interface MyTableViewController : UITableViewController
+@interface MyTableViewController : UITableViewController <NSFetchedResultsControllerDelegate, UIGestureRecognizerDelegate>
 
 @property (readonly, strong, nonatomic) NSManagedObjectContext *managedObjectContext;
 @property (readonly, strong, nonatomic) NSManagedObjectModel *managedObjectModel;
 @property (readonly, strong, nonatomic) NSPersistentStoreCoordinator *persistentStoreCoordinator;
+@property (nonatomic, retain) NSFetchedResultsController *fetchedResultsController;
 
 @property (strong, nonatomic) NSMutableArray *myArray;
 @property (strong, nonatomic) User *selecteduser;
+- (UIView *)customSnapshotFromView:(UIView *)inputView;
 
 @end

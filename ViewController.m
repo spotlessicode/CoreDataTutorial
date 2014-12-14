@@ -132,6 +132,12 @@
         
         [user1 addHobbiesofuserObject:hobby1];
         [type1 addUsersoftypeObject:user1];
+        
+        int num =(int)myArray.count;
+        NSLog(@"num: %d", num);
+        
+        [user1 setValue:[NSNumber numberWithInt:num] forKey:@"displayOrder"];
+        NSLog(@"user1 displayOrder: %@", user1.displayOrder);
   
 
 
