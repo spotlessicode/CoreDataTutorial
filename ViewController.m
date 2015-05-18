@@ -12,6 +12,7 @@
 #import "User.h"
 #import "Type.h"
 #import "Hobby.h"
+#import "MappingHobby.h"
 
 
 
@@ -36,6 +37,29 @@
     self.TextField1.placeholder = @"I am userName";
     self.TextField2.placeholder = @"I am typeName";
     self.TextField3.placeholder = @"I am hobbyName";
+    
+    AppDelegate *appDelegate = [[UIApplication sharedApplication]delegate];
+    _managedObjectContext = [appDelegate managedObjectContext];
+    
+    
+    NSFetchRequest *request =
+    [NSFetchRequest fetchRequestWithEntityName:@"MappingHobby"];
+    [request setFetchLimit:50];
+    NSError *error = nil;
+    NSArray *fetchedObjects =
+    [_managedObjectContext executeFetchRequest:request error:&error];
+    if (error) {NSLog(@"%@", error);} else {
+        for (MappingHobby *hobby in fetchedObjects) { NSLog(@"Fetched MappingHobby Object = %@", hobby.hmname);
+        } }
+    
+    NSFetchRequest *request2 =
+    [NSFetchRequest fetchRequestWithEntityName:@"Hobby"];
+    [request2 setFetchLimit:50];
+    NSArray *fetchedObjects2 =
+    [_managedObjectContext executeFetchRequest:request2 error:&error];
+    if (error) {NSLog(@"%@", error);} else {
+        for (Hobby *hobby in fetchedObjects2) { NSLog(@"Fetched Hobby Object = %@", hobby.hobbyName);
+        } }
 
     
 
@@ -133,12 +157,10 @@
         [user1 addHobbiesofuserObject:hobby1];
         [type1 addUsersoftypeObject:user1];
         
+        //set the user "displayOrder" attribute
         int num =(int)myArray.count;
-        NSLog(@"num: %d", num);
         
         [user1 setValue:[NSNumber numberWithInt:num] forKey:@"displayOrder"];
-        NSLog(@"user1 displayOrder: %@", user1.displayOrder);
-  
 
 
     

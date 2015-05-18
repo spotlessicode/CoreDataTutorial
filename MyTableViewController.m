@@ -16,7 +16,6 @@
 @interface MyTableViewController ()
 
 @property (strong, nonatomic) NSMutableArray *userchangeArray;
-
 @end
 
 @implementation MyTableViewController
@@ -27,7 +26,6 @@
 @synthesize fetchedResultsController = _fetchedResultsController;
 
 @synthesize myArray, selecteduser;
-
 
 - (NSMutableArray *)userchangeArray {
     if (! _userchangeArray) {
@@ -53,6 +51,7 @@
     NSEntityDescription *entity = [NSEntityDescription
                                    entityForName:@"User" inManagedObjectContext:_managedObjectContext];
     [fetchRequest setEntity:entity];
+    
     //set SortDescriptor
     NSSortDescriptor *sort = [[NSSortDescriptor alloc]
                               initWithKey:@"displayOrder" ascending:YES];
@@ -77,9 +76,7 @@
         NSLog(@"Unable to perform fetch.");
         NSLog(@"%@, %@", error, error.localizedDescription);
     }
-    
-    [self.tableView reloadData];
-
+     [self.tableView reloadData];
     return _fetchedResultsController;
     
 }
@@ -99,22 +96,26 @@
         NSLog(@"Unresolved error %@, %@", error, [error userInfo]);
         exit(-1);  // Fail
     }
-
+    
     
     [_fetchedResultsController performFetch:nil];
-    //self.myArray =[_fetchedResultsController.fetchedObjects mutableCopy];
+    self.myArray =[_fetchedResultsController.fetchedObjects mutableCopy];
+
     
     [self.tableView reloadData];
     
-    self.tableView.scrollEnabled = YES;
-    
     self.view.backgroundColor = [UIColor whiteColor];
     
+    self.tableView.scrollEnabled = YES;
     [self.tableView setEditing:NO];
+    
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPress:)];
     longPress.minimumPressDuration = 1.2; //seconds
     longPress.delegate = self;
     [self.tableView addGestureRecognizer:longPress];
+    
+
+    
 
 
     
@@ -136,10 +137,10 @@
 
     // Return the number of rows in the section.
     //return myArray.count;
-    
     id  sectionInfo =
     [[_fetchedResultsController sections] objectAtIndex:section];
     return [sectionInfo numberOfObjects];
+    
 }
 
 
@@ -157,7 +158,7 @@
 
 
 
-     User *user1 = [_fetchedResultsController.fetchedObjects objectAtIndex:indexPath.row];
+     User *user1 = [_fetchedResultsController.fetchedObjects  objectAtIndex:indexPath.row];
     cell.textLabel.text = [NSString stringWithFormat:@"%@ %@", user1.displayOrder, user1.userName];
     
     NSArray *hobbiesArray = [user1.hobbiesofuser allObjects];
@@ -216,7 +217,7 @@
         
         //delete data from database
         
-        [self.managedObjectContext deleteObject:[self.myArray objectAtIndex:indexPath.row]];
+        [self.managedObjectContext deleteObject:[_fetchedResultsController.fetchedObjects  objectAtIndex:indexPath.row]];
         
         NSError *error;
         
@@ -276,7 +277,6 @@
     // Pass the selected object to the new view controller.
 }
 */
-
 - (void)controllerWillChangeContent:
 (NSFetchedResultsController *)controller
 {
@@ -327,6 +327,7 @@
 {
     [self.tableView endUpdates];
 }
+
 
 #pragma mark - Gestures
 
@@ -396,15 +397,14 @@
             center.y = location.y;
             snapshot.center = center;
             
-            self.userchangeArray =[_fetchedResultsController.fetchedObjects mutableCopy];
+            _userchangeArray = [_fetchedResultsController.fetchedObjects mutableCopy];
 
-            
             // Is destination valid and is it different from source?
             if (indexPath && ![indexPath isEqual:sourceIndexPath]) {
                 
                 
                 // ... update data source.
-                [self.userchangeArray exchangeObjectAtIndex:indexPath.row withObjectAtIndex:sourceIndexPath.row];
+                [_userchangeArray exchangeObjectAtIndex:indexPath.row withObjectAtIndex:sourceIndexPath.row];
                 
                 // ... move the rows.
                 [self.tableView moveRowAtIndexPath:sourceIndexPath toIndexPath:indexPath];
@@ -412,20 +412,19 @@
                 // ... and update source so it is in sync with UI changes.
                 sourceIndexPath = indexPath;
             }
+            
             int i = 0;
-            for (NSManagedObject *mo in self.userchangeArray)
+            for (NSManagedObject *savechange in self.userchangeArray)
             {
-                [mo setValue:[NSNumber numberWithInt:i++] forKey:@"displayOrder"];
+                [savechange setValue:[NSNumber numberWithInt:i++] forKey:@"displayOrder"];
             }
             
-            self.userchangeArray = nil;
+            self.userchangeArray= nil;
             
             NSError *error;
             if (![self.managedObjectContext save:&error]) {
                 NSLog(@"Whoops, couldn't save: %@", [error localizedDescription]);
             }
-
-
             
             break;
         }
@@ -455,7 +454,7 @@
 
 - (UIView *)customSnapshotFromView:(UIView *)inputView {
     
-
+    
     // make an image from the pressed tableview cell
     UIGraphicsBeginImageContextWithOptions(inputView.bounds.size, NO, 0);
     [inputView.layer renderInContext:UIGraphicsGetCurrentContext()];
